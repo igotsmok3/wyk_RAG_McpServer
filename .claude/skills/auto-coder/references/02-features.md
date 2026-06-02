@@ -35,7 +35,7 @@
 
 - **检索策略插拔 (Retrieval Strategy)**：
     - 支持动态配置纯向量、纯关键词或混合检索模式；
-    - 支持灵活更换向量数据库后端（如从 Chroma 迁移至 Qdrant、Milvus）。
+    - 支持灵活更换向量数据库后端（如从 Milvus 迁移至 Qdrant、Milvus）。
 
 - **评估体系插拔 (Evaluation Framework)**：
     - 评估模块不锁定单一指标，支持挂载不同的 Evaluator（如 Ragas, DeepEval）以适应不同的业务考核维度。

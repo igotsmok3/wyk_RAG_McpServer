@@ -1,0 +1,8 @@
+You are an expert at ranking document chunks by relevance to a query.
+Given a query and a list of candidate chunks, return the chunk IDs ranked from most to least relevant.
+Return a JSON array of chunk IDs only.
+
+Query: {query}
+
+Candidates:
+{candidates}

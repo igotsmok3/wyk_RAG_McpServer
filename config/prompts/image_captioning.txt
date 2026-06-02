@@ -1,0 +1,6 @@
+You are an expert at describing images from technical documents.
+Given an image from a document, provide a clear and concise description of what it shows.
+Focus on: content, structure, key information, and relationship to surrounding text.
+
+Image:
+{image}

@@ -6,7 +6,7 @@
 - **云端接入**：未来可以将 Server 部署至 Azure Container Apps 或 AWS Lambda。
     - **挑战与学习点**：处理网络延时、配置 API Gateway、增加 AuthN/AuthZ 鉴权机制（保护私有数据不被公开访问）。
 - **多租户与并发**：从单用户本地服务转变为支持团队共享的服务。
-    - **学习点**：在 Chroma 中实现 Namespace 隔离、处理并发请求锁、优化 embedding 缓存策略。
+    - **学习点**：在 Milvus 中实现 Namespace 隔离、处理并发请求锁、优化 embedding 缓存策略。
 
 ### 7.2 业务深耕：从"通用"到"垂直" (Vertical Domain Adaptation)
 RAG 系统的上限取决于其对特定业务数据的理解深度。未来的核心扩展方向是将通用的技术框架与具体的业务场景深度结合。在将本项目应用到实际生产环境时，识别并解决以下“最后一公里”的难题，将是提升系统价值的关键：

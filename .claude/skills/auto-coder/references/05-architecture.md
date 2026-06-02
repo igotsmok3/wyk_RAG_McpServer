@@ -75,7 +75,7 @@
 │    │                             Vector Store (向量存储)                              │      │
 │    │                                                                                 │      │
 │    │     ┌─────────────────────────────────────────────────────────────────────┐     │      │
-│    │     │                         Chroma DB                                   │     │      │
+│    │     │                         Milvus DB                                   │     │      │
 │    │     │    Dense Vector | Sparse Vector | Chunk Content | Metadata          │     │      │
 │    │     └─────────────────────────────────────────────────────────────────────┘     │      │
 │    └─────────────────────────────────────────────────────────────────────────────────┘      │
@@ -101,7 +101,7 @@
 │         │                  │                  │                  │                │         │
 │         ▼                  ▼                  ▼                  ▼                ▼         │
 │    ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐   │
-│    │MarkItDown │    │Recursive   │    │LLM重写     │    │Dense:      │    │Chroma      │   │
+│    │MarkItDown │    │Recursive   │    │LLM重写     │    │Dense:      │    │Milvus      │   │
 │    │PDF→MD     │    │Character   │    │Image       │    │OpenAI/BGE  │    │Upsert      │   │
 │    │元数据提取 │    │TextSplitter│    │Captioning  │    │Sparse:BM25 │    │幂等写入    │   │
 │    └────────────┘    └────────────┘    └────────────┘    └────────────┘    └────────────┘   │
@@ -118,7 +118,7 @@
 │  │ LLM Client │ │ Embedding  │ │  Splitter  │ │VectorStore │ │  Reranker  │ │ Evaluator  │  │
 │  │  Factory   │ │  Factory   │ │  Factory   │ │  Factory   │ │  Factory   │ │  Factory   │  │
 │  ├────────────┤ ├────────────┤ ├────────────┤ ├────────────┤ ├────────────┤ ├────────────┤  │
-│  │ · Azure    │ │ · OpenAI   │ │ · Recursive│ │ · Chroma   │ │ · None     │ │ · Ragas    │  │
+│  │ · Azure    │ │ · OpenAI   │ │ · Recursive│ │ · Milvus   │ │ · None     │ │ · Ragas    │  │
 │  │ · OpenAI   │ │ · BGE      │ │ · Semantic │ │ · Qdrant   │ │ · CrossEnc │ │ · DeepEval │  │
 │  │ · Ollama   │ │ · Ollama   │ │ · FixedLen │ │ · Pinecone │ │ · LLM      │ │ · Custom   │  │
 │  │ · DeepSeek │ │ · ...      │ │ · ...      │ │ · ...      │ │            │ │            │  │
@@ -259,7 +259,7 @@ smart-knowledge-hub/
 │   │   │   ├── __init__.py
 │   │   │   ├── base_vector_store.py     # VectorStore 抽象基类
 │   │   │   ├── vector_store_factory.py  # VectorStore 工厂
-│   │   │   └── chroma_store.py          # Chroma 实现
+│   │   │   └── Milvus_store.py          # Milvus 实现
 │   │   │
 │   │   ├── reranker/                    # Reranker 抽象
 │   │   │   ├── __init__.py
@@ -290,7 +290,7 @@ smart-knowledge-hub/
 │       │   │   └── evaluation_panel.py  # 评估面板 (运行评估/查看指标)
 │       │   └── services/                # Dashboard 数据服务层
 │       │       ├── trace_service.py     # Trace 读取服务 (解析 traces.jsonl)
-│       │       ├── data_service.py      # 数据浏览服务 (ChromaStore/ImageStorage)
+│       │       ├── data_service.py      # 数据浏览服务 (MilvusStore/ImageStorage)
 │       │       └── config_service.py    # 配置读取服务 (Settings 展示)
 │       └── evaluation/                  # 评估模块
 │           ├── __init__.py
@@ -311,7 +311,7 @@ smart-knowledge-hub/
 │       ├── image_index.db               # 图片索引映射 (SQLite)
 │       │                                # 表结构：image_id, file_path, collection, doc_hash, page_num
 │       │                                # 用途：快速查询 image_id → 本地文件路径，支持图片检索与引用
-│       ├── chroma/                      # Chroma 向量库目录
+│       ├── Milvus/                      # Milvus 向量库目录
 │       │                                # 存储 Dense Vector、Sparse Vector 与 Chunk Metadata
 │       └── bm25/                        # BM25 索引目录
 │                                        # 存储倒排索引与 IDF 统计信息（当前使用 pickle）
@@ -404,7 +404,7 @@ smart-knowledge-hub/
 | 模块 | 职责 | 关键技术点 |
 |-----|-----|----------|
 | `pipeline.py` | Pipeline 流程编排 | 串行执行（或分阶段可观测），异常处理，增量更新；支持 `on_progress` 回调；统一使用 `core/types.py` 的数据契约 |
-| `document_manager.py` | 文档生命周期管理 | list/delete/stats 操作；跨 4 个存储（Chroma/BM25/ImageStorage/FileIntegrity）的协调删除；供 Dashboard 与 CLI 调用 |
+| `document_manager.py` | 文档生命周期管理 | list/delete/stats 操作；跨 4 个存储（Milvus/BM25/ImageStorage/FileIntegrity）的协调删除；供 Dashboard 与 CLI 调用 |
 
 | `chunking/document_chunker.py` | Document→Chunks 转换 | 调用 `libs.splitter` 进行文本切分；生成稳定 Chunk ID（格式：`{doc_id}_{index:04d}_{hash}`）；继承 metadata；建立 source_ref 溯源链接 |
 | `transform/base_transform.py` | Transform 抽象 | 原子化、幂等；可独立重试；失败降级不阻塞 |
@@ -425,7 +425,7 @@ smart-knowledge-hub/
 | `Loader` | PDF Loader（MarkItDown） | Markdown/HTML/Code Loader 等 |
 | `FileIntegrity` | SQLite (`data/db/ingestion_history.db`) | Redis（分布式）/ PostgreSQL（企业级）/ JSON文件（测试） |
 | `Splitter` | RecursiveCharacterTextSplitter | Semantic / FixedLen |
-| `VectorStore` | Chroma | Qdrant / Pinecone / Milvus |
+| `VectorStore` | Milvus | Qdrant / Pinecone / Milvus |
 | `Reranker` | CrossEncoder | LLM Rerank / None (关闭) |
 | `Evaluator` | Ragas | DeepEval / 自定义指标 |
 
@@ -444,7 +444,7 @@ smart-knowledge-hub/
 | `dashboard/pages/query_traces.py` | Query 追踪 | 查询历史，Dense/Sparse 对比，Rerank 变化 |
 | `dashboard/pages/evaluation_panel.py` | 评估面板 | 运行评估，指标展示，历史趋势（Phase H 实现） |
 | `dashboard/services/trace_service.py` | Trace 数据服务 | 解析 traces.jsonl，按 trace_type 分类 |
-| `dashboard/services/data_service.py` | 数据浏览服务 | 封装 ChromaStore/ImageStorage 读取 |
+| `dashboard/services/data_service.py` | 数据浏览服务 | 封装 MilvusStore/ImageStorage 读取 |
 | `dashboard/services/config_service.py` | 配置读取服务 | 封装 Settings 展示 |
 | `evaluation/eval_runner.py` | 评估执行 | 黄金测试集，指标计算，报告生成 |
 | `evaluation/ragas_evaluator.py` | Ragas 评估 | Faithfulness, Answer Relevancy, Context Precision |
@@ -490,7 +490,7 @@ smart-knowledge-hub/
          │ Vectors + Chunks + Metadata
          ▼
 ┌─────────────────┐
-│    Upsert       │  Chroma Upsert (幂等) + BM25 Index + 图片存储
+│    Upsert       │  Milvus Upsert (幂等) + BM25 Index + 图片存储
 │   (Storage)     │
 └─────────────────┘
 ```
@@ -552,7 +552,7 @@ Dashboard (Streamlit UI)
       ├─── 数据浏览 ──────────────────────────────────────────┐
       │                                                       │
       │    DataService                                        │
-      │    ├── ChromaStore.get_by_metadata(source=...)        │
+      │    ├── MilvusStore.get_by_metadata(source=...)        │
       │    ├── ImageStorage.list_images(collection, doc_hash) │
       │    └── 返回文档列表 / Chunk 详情 / 图片预览            │
       │                                                       │
@@ -565,7 +565,7 @@ Dashboard (Streamlit UI)
       │                                                       │
       │    删除文档：                                          │
       │    ├── DocumentManager.delete_document(source, col)   │
-      │    │   ├── ChromaStore.delete_by_metadata(source=...) │
+      │    │   ├── MilvusStore.delete_by_metadata(source=...) │
       │    │   ├── BM25Indexer.remove_document(source=...)    │
       │    │   ├── ImageStorage.delete_images(col, doc_hash)  │
       │    │   └── FileIntegrity.remove_record(file_hash)     │
@@ -606,8 +606,8 @@ vision_llm:
   
 # 向量存储配置
 vector_store:
-  backend: chroma           # chroma | qdrant | pinecone
-  persist_path: ./data/db/chroma
+  backend: Milvus           # Milvus | qdrant | pinecone
+  persist_path: ./data/db/Milvus
 
 # 检索配置
 retrieval:
