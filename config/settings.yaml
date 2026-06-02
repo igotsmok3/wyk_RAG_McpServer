@@ -10,7 +10,7 @@ llm:
   deployment_name: ""
   azure_endpoint: ""
   api_version: ""
-  api_key: "<YOUR_DASHSCOPE_API_KEY>"  # 填入你的 DashScope API Key
+  api_key: "${DASHSCOPE_API_KEY}"  # 填入你的 DashScope API Key
   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
   temperature: 0.0
   max_tokens: 4096
@@ -25,7 +25,7 @@ embedding:
   azure_endpoint: ""
   deployment_name: ""
   api_version: ""
-  api_key: "<YOUR_DASHSCOPE_API_KEY>"  # 填入你的 DashScope API Key
+  api_key: "${DASHSCOPE_API_KEY}"  # 填入你的 DashScope API Key
   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
 # =============================================================================
@@ -38,7 +38,7 @@ vision_llm:
   azure_endpoint: ""
   deployment_name: ""
   api_version: ""
-  api_key: "<YOUR_DASHSCOPE_API_KEY>"  # 填入你的 DashScope API Key
+  api_key: "${DASHSCOPE_API_KEY}"  # 填入你的 DashScope API Key
   base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
   max_image_size: 2048
 

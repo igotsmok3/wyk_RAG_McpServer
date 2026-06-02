@@ -7,6 +7,8 @@ from typing import Any
 
 import yaml
 
+import os
+
 
 # ---------------------------------------------------------------------------
 # Sub-config dataclasses
@@ -153,7 +155,8 @@ def load_settings(path: str = "config/settings.yaml") -> Settings:
         raise FileNotFoundError(f"Settings file not found: {path}")
 
     with open(path, "r", encoding="utf-8") as f:
-        raw: dict[str, Any] = yaml.safe_load(f) or {}
+        content = os.path.expandvars(f.read())  # 替换 ${VAR} 和 $VAR
+        raw: dict[str, Any] = yaml.safe_load(content) or {}
 
     llm_raw = raw.get("llm", {})
     embedding_raw = raw.get("embedding", {})
