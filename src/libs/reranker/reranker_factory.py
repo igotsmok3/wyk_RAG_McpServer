@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from libs.reranker.base_reranker import BaseReranker, NoneReranker
+from libs.reranker.cross_encoder_reranker import CrossEncoderReranker
 from libs.reranker.llm_reranker import LLMReranker
 
 if TYPE_CHECKING:
@@ -13,6 +14,7 @@ if TYPE_CHECKING:
 _REGISTRY: dict[str, type[BaseReranker]] = {
     "none": NoneReranker,
     "llm": LLMReranker,
+    "cross_encoder": CrossEncoderReranker,
 }
 
 
