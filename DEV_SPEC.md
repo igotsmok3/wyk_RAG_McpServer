@@ -1973,7 +1973,7 @@ dashboard:
 | B7.6 | MilvusStore 默认实现 | [x] | 2026-06-03 | |
 | B7.7 | LLM Reranker 实现 | [x] | 2026-06-03 | |
 | B7.8 | Cross-Encoder Reranker 实现 | [x] | 2026-06-03 | |
-| B8 | Vision LLM 抽象接口与工厂集成 | [ ] | | |
+| B8 | Vision LLM 抽象接口与工厂集成 | [x] | 2026-06-03 | |
 | B9 | Azure Vision LLM 实现 | [ ] | | |
 
 #### 阶段 C：Ingestion Pipeline MVP
