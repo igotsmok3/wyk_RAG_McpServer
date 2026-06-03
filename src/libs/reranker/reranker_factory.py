@@ -4,6 +4,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 from libs.reranker.base_reranker import BaseReranker, NoneReranker
+from libs.reranker.llm_reranker import LLMReranker
 
 if TYPE_CHECKING:
     from core.settings import RerankSettings
@@ -11,6 +12,7 @@ if TYPE_CHECKING:
 # Provider registry: maps backend name → class(settings) -> BaseReranker
 _REGISTRY: dict[str, type[BaseReranker]] = {
     "none": NoneReranker,
+    "llm": LLMReranker,
 }
 
 
