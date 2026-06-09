@@ -197,7 +197,7 @@
 		- 机制：在解析文件前，计算原始文件的 SHA256 哈希指纹。
 		- 动作：检索 `ingestion_history` 表，若发现相同 Hash 且状态为 `success` 的记录，则认定该文件未发生变更，直接跳过后续所有处理（解析、切分、LLM重写），实现**零成本 (Zero-Cost)** 的增量更新。
 		- **存储方案**（初期实现，可插拔）：
-			- **默认选择：SQLite**，存储于 `data/db/ingestion_history.db`
+			- **默认选择：Mysql**，存储于 `data/db/ingestion_history.db`
 			- **表结构**：
 				```sql
 				CREATE TABLE ingestion_history (
@@ -217,21 +217,21 @@
 	
 	> **📌 持久化存储架构统一说明**
 	> 
-	> 本项目在多个核心模块中采用 **SQLite** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
+	> 本项目在多个核心模块中采用 **Mysql** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
 	> 
 	> | 存储模块 | 数据库文件 | 用途 | 表结构关键字段 |
 	> |---------|-----------|------|---------------|
 	> | **文件完整性检查** | `data/db/ingestion_history.db` | 记录已处理文件的 SHA256 哈希，实现增量摄取 | `file_hash`, `status`, `processed_at` |
 	> | **图片索引映射** | `data/db/image_index.db` | 记录 image_id → 文件路径映射，支持图片检索与引用 | `image_id`, `file_path`, `collection` |
-	> | **BM25 索引元数据** | `data/db/bm25/` | 存储倒排索引和 IDF 统计信息（未来可扩展用 SQLite） | 当前使用 pickle，可迁移至 SQLite |
+	> | **BM25 索引元数据** | `data/db/bm25/` | 存储倒排索引和 IDF 统计信息（未来可扩展用 Mysql） | 当前使用 pickle，可迁移至 Mysql |
 	> 
 	> **设计优势**：
 	> - **零依赖部署**：无需安装 MySQL/PostgreSQL 等数据库服务，`pip install` 即可运行
 	> - **并发安全**：WAL (Write-Ahead Logging) 模式支持多进程安全读写
 	> - **持久化保证**：摄取历史和索引映射在进程重启后自动恢复，避免重复计算
-	> - **架构一致性**：所有 SQLite 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
+	> - **架构一致性**：所有 Mysql 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
 	> 
-	> **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 SQLite 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
+	> **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 Mysql 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
 	
 	- **解析与标准化**：
 		- 当前范围：**仅实现 PDF -> canonical Markdown 子集** 的转换。
@@ -1562,10 +1562,10 @@ smart-knowledge-hub/
 │   ├── images/                          # 提取的图片存放
 │   │   └── {collection}/                # 按集合分类（实际存储在 {doc_hash}/ 子目录下）
 │   └── db/                              # 数据库与索引文件目录
-│       ├── ingestion_history.db         # 文件完整性历史记录 (SQLite)
+│       ├── ingestion_history.db         # 文件完整性历史记录 (Mysql)
 │       │                                # 表结构：file_hash, file_path, status, processed_at, error_msg
 │       │                                # 用途：增量摄取，避免重复处理未变更文件
-│       ├── image_index.db               # 图片索引映射 (SQLite)
+│       ├── image_index.db               # 图片索引映射 (Mysql)
 │       │                                # 表结构：image_id, file_path, collection, doc_hash, page_num
 │       │                                # 用途：快速查询 image_id → 本地文件路径，支持图片检索与引用
 │       ├── Milvus/                      # Milvus 向量库目录
@@ -1680,7 +1680,7 @@ smart-knowledge-hub/
 | `VisionLLMClient` | Azure OpenAI Vision (GPT-4o) | OpenAI Vision / Ollama Vision (LLaVA) |
 | `EmbeddingClient` | OpenAI text-embedding-3 | BGE / Ollama 本地模型 |
 | `Loader` | PDF Loader（MarkItDown） | Markdown/HTML/Code Loader 等 |
-| `FileIntegrity` | SQLite (`data/db/ingestion_history.db`) | Redis（分布式）/ PostgreSQL（企业级）/ JSON文件（测试） |
+| `FileIntegrity` | Mysql (`data/db/ingestion_history.db`) | Redis（分布式）/ PostgreSQL（企业级）/ JSON文件（测试） |
 | `Splitter` | RecursiveCharacterTextSplitter | Semantic / FixedLen |
 | `VectorStore` | Milvus | Qdrant / Pinecone / Milvus |
 | `Reranker` | CrossEncoder | LLM Rerank / None (关闭) |
@@ -1980,7 +1980,7 @@ dashboard:
 
 | 任务编号 | 任务名称 | 状态 | 完成日期 | 备注 |
 |---------|---------|------|---------|------|
-| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [ ] | | |
+| C1 | 定义核心数据类型/契约（Document/Chunk/ChunkRecord） | [x] | 2026-06-09 | |
 | C2 | 文件完整性检查（SHA256） | [ ] | | |
 | C3 | Loader 抽象基类与 PDF Loader | [ ] | | |
 | C4 | Splitter 集成（调用 Libs） | [ ] | | |
@@ -1992,7 +1992,7 @@ dashboard:
 | C10 | BatchProcessor | [ ] | | |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
 | C12 | VectorUpserter（幂等upsert） | [ ] | | |
-| C13 | ImageStorage（图片存储+SQLite索引） | [ ] | | |
+| C13 | ImageStorage（图片存储+Mysql索引） | [ ] | | |
 | C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
 | C15 | 脚本入口 ingest.py | [ ] | | |
 
@@ -2339,7 +2339,7 @@ dashboard:
 
 ## 阶段 C：Ingestion Pipeline MVP（目标：能把 PDF 样例摄取到本地存储）
 
-> 注：本阶段严格按 5.4.1 的离线数据流落地，并优先实现“增量跳过（SHA256）”。
+> 注：本阶段严格按 "05-architecture.md" 的 5.4.1 的离线数据流（离线数据摄取流 (Ingestion Flow)）落地，并优先实现“增量跳过（SHA256）”。
 
 ### C1：定义核心数据类型/契约（Document/Chunk/ChunkRecord）
 - **目标**：定义全链路（ingestion → retrieval → mcp tools）共用的数据结构/契约，避免散落在各子模块内导致的耦合与重复。
@@ -2367,14 +2367,14 @@ dashboard:
 - **测试方法**：`pytest -q tests/unit/test_core_types.py`。
 
 ### C2：文件完整性检查（SHA256）
-- **目标**：在Libs中实现 `file_integrity.py`：计算文件 hash，并提供“是否跳过”的判定接口（使用 SQLite 作为默认存储，支持后续替换为 Redis/PostgreSQL）。
+- **目标**：在Libs中实现 `file_integrity.py`：计算文件 hash，并提供“是否跳过”的判定接口（使用 Mysql 作为默认存储，支持后续替换为 Redis/PostgreSQL）。
 - **修改文件**：
   - `src/libs/loader/file_integrity.py`
   - `tests/unit/test_file_integrity.py`
   - 数据库文件：`data/db/ingestion_history.db`（自动创建）
 - **实现类/函数**：
   - `FileIntegrityChecker` 类（抽象接口）
-  - `SQLiteIntegrityChecker(FileIntegrityChecker)` 类（默认实现）
+  - `MysqlIntegrityChecker(FileIntegrityChecker)` 类（默认实现）
     - `compute_sha256(path: str) -> str`
     - `should_skip(file_hash: str) -> bool`
     - `mark_success(file_hash: str, file_path: str, ...)`
@@ -2383,7 +2383,7 @@ dashboard:
   - 同一文件多次计算hash结果一致
   - 标记 success 后，`should_skip` 返回 `True`
   - 数据库文件正确创建在 `data/db/ingestion_history.db`
-  - 支持并发写入（SQLite WAL模式）
+  - 支持并发写入（Mysql WAL模式）
 - **测试方法**：`pytest -q tests/unit/test_file_integrity.py`。
 
 ### C3：Loader 抽象基类与 PDF Loader 壳子
@@ -2607,13 +2607,13 @@ dashboard:
 - **备注**：本任务完成Dense路径的最后一环，为D2 (DenseRetriever) 提供可查询的向量数据库。
 
 ### C13：ImageStorage（图片文件存储与索引表契约）
-- **目标**：实现 `image_storage.py`：保存图片到 `data/images/{collection}/`，并使用 **SQLite** 记录 image_id→path 映射。
+- **目标**：实现 `image_storage.py`：保存图片到 `data/images/{collection}/`，并使用 **Mysql** 记录 image_id→path 映射。
 - **修改文件**：
   - `src/ingestion/storage/image_storage.py`
   - `tests/unit/test_image_storage.py`
 - **验收标准**：保存后文件存在；查找 image_id 返回正确路径；映射关系持久化在 `data/db/image_index.db`。
 - **技术方案**：
-  - 复用项目已有的 SQLite 架构模式（参考 `file_integrity.py` 的 `SQLiteIntegrityChecker`）
+  - 复用项目已有的 Mysql 架构模式（参考 `file_integrity.py` 的 `MysqlIntegrityChecker`）
   - 数据库表结构：
     ```sql
     CREATE TABLE image_index (
