@@ -79,7 +79,7 @@
 | C7 | ImageCaptioner | [x] | 2026-06-09 | |
 | C8 | DenseEncoder | [x] | 2026-06-09 | |
 | C9 | SparseEncoder | [x] | 2026-06-09 | |
-| C10 | BatchProcessor | [ ] | | |
+| C10 | BatchProcessor | [x] | 2026-06-09 | |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [ ] | | |
 | C12 | VectorUpserter（幂等upsert） | [ ] | | |
 | C13 | ImageStorage（图片存储+Mysql索引） | [ ] | | |
