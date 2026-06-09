@@ -29,7 +29,7 @@
 		- 机制：在解析文件前，计算原始文件的 SHA256 哈希指纹。
 		- 动作：检索 `ingestion_history` 表，若发现相同 Hash 且状态为 `success` 的记录，则认定该文件未发生变更，直接跳过后续所有处理（解析、切分、LLM重写），实现**零成本 (Zero-Cost)** 的增量更新。
 		- **存储方案**（初期实现，可插拔）：
-			- **默认选择：SQLite**，存储于 `data/db/ingestion_history.db`
+			- **默认选择：Mysql**，存储于 `data/db/ingestion_history.db`
 			- **表结构**：
 				```sql
 				CREATE TABLE ingestion_history (
@@ -49,21 +49,21 @@
 	
 	> **📌 持久化存储架构统一说明**
 	> 
-	> 本项目在多个核心模块中采用 **SQLite** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
+	> 本项目在多个核心模块中采用 **Mysql** 作为轻量级持久化存储方案，避免引入重量级数据库依赖，保持本地优先（Local-First）的设计理念：
 	> 
 	> | 存储模块 | 数据库文件 | 用途 | 表结构关键字段 |
 	> |---------|-----------|------|---------------|
 	> | **文件完整性检查** | `data/db/ingestion_history.db` | 记录已处理文件的 SHA256 哈希，实现增量摄取 | `file_hash`, `status`, `processed_at` |
 	> | **图片索引映射** | `data/db/image_index.db` | 记录 image_id → 文件路径映射，支持图片检索与引用 | `image_id`, `file_path`, `collection` |
-	> | **BM25 索引元数据** | `data/db/bm25/` | 存储倒排索引和 IDF 统计信息（未来可扩展用 SQLite） | 当前使用 pickle，可迁移至 SQLite |
+	> | **BM25 索引元数据** | `data/db/bm25/` | 存储倒排索引和 IDF 统计信息（未来可扩展用 Mysql） | 当前使用 pickle，可迁移至 Mysql |
 	> 
 	> **设计优势**：
 	> - **零依赖部署**：无需安装 MySQL/PostgreSQL 等数据库服务，`pip install` 即可运行
 	> - **并发安全**：WAL (Write-Ahead Logging) 模式支持多进程安全读写
 	> - **持久化保证**：摄取历史和索引映射在进程重启后自动恢复，避免重复计算
-	> - **架构一致性**：所有 SQLite 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
+	> - **架构一致性**：所有 Mysql 模块遵循相同的初始化、查询与错误处理模式，便于维护与扩展
 	> 
-	> **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 SQLite 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
+	> **升级路径**：当系统规模扩展至分布式场景时，可通过统一的抽象接口将 Mysql 替换为 PostgreSQL 或 Redis，无需修改上层业务逻辑。
 	
 	- **解析与标准化**：
 		- 当前范围：**仅实现 PDF -> canonical Markdown 子集** 的转换。

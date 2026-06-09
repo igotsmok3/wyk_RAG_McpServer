@@ -305,10 +305,10 @@ smart-knowledge-hub/
 │   ├── images/                          # 提取的图片存放
 │   │   └── {collection}/                # 按集合分类（实际存储在 {doc_hash}/ 子目录下）
 │   └── db/                              # 数据库与索引文件目录
-│       ├── ingestion_history.db         # 文件完整性历史记录 (SQLite)
+│       ├── ingestion_history.db         # 文件完整性历史记录 (Mysql)
 │       │                                # 表结构：file_hash, file_path, status, processed_at, error_msg
 │       │                                # 用途：增量摄取，避免重复处理未变更文件
-│       ├── image_index.db               # 图片索引映射 (SQLite)
+│       ├── image_index.db               # 图片索引映射 (Mysql)
 │       │                                # 表结构：image_id, file_path, collection, doc_hash, page_num
 │       │                                # 用途：快速查询 image_id → 本地文件路径，支持图片检索与引用
 │       ├── Milvus/                      # Milvus 向量库目录
@@ -423,7 +423,7 @@ smart-knowledge-hub/
 | `VisionLLMClient` | Azure OpenAI Vision (GPT-4o) | OpenAI Vision / Ollama Vision (LLaVA) |
 | `EmbeddingClient` | OpenAI text-embedding-3 | BGE / Ollama 本地模型 |
 | `Loader` | PDF Loader（MarkItDown） | Markdown/HTML/Code Loader 等 |
-| `FileIntegrity` | SQLite (`data/db/ingestion_history.db`) | Redis（分布式）/ PostgreSQL（企业级）/ JSON文件（测试） |
+| `FileIntegrity` | Mysql (`data/db/ingestion_history.db`) | Redis（分布式）/ PostgreSQL（企业级）/ JSON文件（测试） |
 | `Splitter` | RecursiveCharacterTextSplitter | Semantic / FixedLen |
 | `VectorStore` | Milvus | Qdrant / Pinecone / Milvus |
 | `Reranker` | CrossEncoder | LLM Rerank / None (关闭) |
