@@ -1,0 +1,54 @@
+[
+  {
+    "id": "typical_noise_scenario",
+    "description": "综合噪声：页眉/页脚/多余空白",
+    "input": "\n\n   Chapter 3: Introduction   \n\n\nThis is a valuable paragraph with important information.\n\n────────────────────────────\nPage 15\n\n   Footer: Confidential © 2024   \n\n",
+    "expected_clean": "Chapter 3: Introduction\n\nThis is a valuable paragraph with important information."
+  },
+  {
+    "id": "ocr_errors",
+    "description": "OCR错误文本：规则清理不修正OCR错误",
+    "input": "The qu1ck br0wn f0x jumps 0ver the 1azy d0g. Th1s t3xt c0nta1ns OCR 3rr0rs.",
+    "expected_clean": "The qu1ck br0wn f0x jumps 0ver the 1azy d0g. Th1s t3xt c0nta1ns OCR 3rr0rs.",
+    "note": "Rule-based refiner preserves OCR errors; LLM can optionally correct them"
+  },
+  {
+    "id": "page_header_footer",
+    "description": "标准页眉页脚模式",
+    "input": "────────────────────────────\nPage 42 | Section 5.3\n────────────────────────────\n\nThe actual content starts here and continues with valuable information.\n\n────────────────────────────\nFooter: Company Name | 2024\n────────────────────────────",
+    "expected_clean": "The actual content starts here and continues with valuable information."
+  },
+  {
+    "id": "excessive_whitespace",
+    "description": "多余空白和换行",
+    "input": "This    has     excessive     spaces.\n\n\n\n\nAnd    too   many\n\n\n\nnewlines.",
+    "expected_clean": "This has excessive spaces.\n\nAnd too many\n\nnewlines."
+  },
+  {
+    "id": "format_markers",
+    "description": "HTML标签和注释，保留Markdown格式",
+    "input": "<div class=\"content\">This is the actual content.</div>\n<!-- This is a comment -->\n**Bold text** and *italic text*.",
+    "expected_clean": "This is the actual content.\n\n**Bold text** and *italic text*.",
+    "note": "Preserve Markdown formatting, remove HTML comments and tags"
+  },
+  {
+    "id": "clean_text",
+    "description": "干净文本，不应过度清理",
+    "input": "This is already clean text with proper formatting.\n\nIt has normal paragraphs and spacing.",
+    "expected_clean": "This is already clean text with proper formatting.\n\nIt has normal paragraphs and spacing.",
+    "note": "Should not over-clean already good text"
+  },
+  {
+    "id": "code_blocks",
+    "description": "代码块，必须保留内部格式和空白",
+    "input": "```python\ndef    hello_world():\n    print(\"Hello,    World!\")\n    return    True\n```\n\nThis function has intentional spacing.",
+    "expected_clean": "```python\ndef    hello_world():\n    print(\"Hello,    World!\")\n    return    True\n```\n\nThis function has intentional spacing.",
+    "note": "Must preserve code block formatting and internal spacing"
+  },
+  {
+    "id": "mixed_noise",
+    "description": "真实混合场景：分隔线/页眉/多余空白/HTML注释",
+    "input": "────────────────────────────\nPage 123\n────────────────────────────\n\n\n## Real Heading\n\nThis paragraph  has   mixed   issues:  \n- Extra    spaces  \n- Multiple\n\n\n\nblank lines\n\n<!-- HTML comment to remove -->\n\n────────────────────────────\nFooter Text\n────────────────────────────\n\n",
+    "expected_clean": "## Real Heading\n\nThis paragraph has mixed issues:\n- Extra spaces\n- Multiple\n\nblank lines"
+  }
+]
