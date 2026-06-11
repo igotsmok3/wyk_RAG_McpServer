@@ -81,9 +81,9 @@
 | C9 | SparseEncoder | [x] | 2026-06-09 | |
 | C10 | BatchProcessor | [x] | 2026-06-09 | |
 | C11 | BM25Indexer（倒排索引+IDF计算） | [x] | | |
-| C12 | VectorUpserter（幂等upsert） | [ ] | | |
-| C13 | ImageStorage（图片存储+Mysql索引） | [ ] | | |
-| C14 | Pipeline 编排（MVP 串起来） | [ ] | | |
+| C12 | VectorUpserter（幂等upsert） | [x] | | |
+| C13 | ImageStorage（图片存储+Mysql索引） | [x] | 2026-06-11 | |
+| C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-06-11 | |
 | C15 | 脚本入口 ingest.py | [ ] | | |
 
 #### 阶段 D：Retrieval MVP
