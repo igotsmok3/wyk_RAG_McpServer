@@ -1994,7 +1994,7 @@ dashboard:
 | C12 | VectorUpserter（幂等upsert） | [x] | | |
 | C13 | ImageStorage（图片存储+Mysql索引） | [x] | 2026-06-11 | |
 | C14 | Pipeline 编排（MVP 串起来） | [x] | 2026-06-11 | |
-| C15 | 脚本入口 ingest.py | [ ] | | |
+| C15 | 脚本入口 ingest.py | [x] | 2026-06-11 | |
 
 #### 阶段 D：Retrieval MVP
 
